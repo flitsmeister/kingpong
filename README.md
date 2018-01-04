@@ -2,6 +2,7 @@
 Slack App for keeping score of Ping-Pong in the Office.
 
 This is the result from Flitsmeister Hackathon 2017.
+Video: https://flitsmeister.github.io/kingpong/
 
 Core contributors:
 - [@ivoduits](https://github.com/ivoduits)
