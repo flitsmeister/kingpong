@@ -1,0 +1,31 @@
+{
+  "name": "kingpong",
+  "version": "1.0.0",
+  "description": "Slack App for keeping score of Ping Pong in the Office. (Flitsmeister Hackathon 2017)",
+  "main": "service.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flitsmeister/kingpong.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/flitsmeister/kingpong/issues"
+  },
+  "homepage": "https://github.com/flitsmeister/kingpong#readme",
+  "dependencies": {
+    "dotenv": "~4.0.0",
+    "hapi": "~17.2.0",
+    "mysql": "~2.15.0",
+    "slack": "~9.1.2",
+    "yield-yield": "~1.3.1"
+  },
+  "devDependencies": {
+    "fm-eslint": "github:flitsmeister/fm-eslint",
+    "lab": "~15.1.2",
+    "mockery": "~2.1.0"
+  }
+}
