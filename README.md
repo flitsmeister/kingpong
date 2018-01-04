@@ -1,17 +1,17 @@
 # kingpong
-Slack App for keeping score of Ping Pong in the Office. (Flitsmeister Hackathon 2017)
+Slack App for keeping score of Ping-Pong in the Office.
 
 This is the result from Flitsmeister Hackathon 2017.
 
 Core contributors:
-@ivoduits
-@rubenmx
-@nickmeessen
-@bramerto
+- [@ivoduits](https://github.com/ivoduits)
+- [@rubenmx](https://github.com/rubenmx)
+- [@nickmeessen](https://github.com/nickmeessen)
+- [@bramerto](https://github.com/bramerto)
 
 Free for public use and PR's are welcome!
 
-## Installation
+## Installation Guide
 - Copy .env.example to .env
 - Set Slack credentials in .env file.
 - Setup a MySQL database with the following structure and enter credentials in .env
