@@ -52,3 +52,13 @@ CREATE TABLE `players` (
 - /kingpong challenge @playername (challenge player)
 - /kingpong leaderboard (prints the current leaderboard)
 
+## Contributing
+We use a ESLint file (https://github.com/flitsmeister/fm-eslint) to enforce a code standard, and we try to use most of ES6 features.
+
+- Fork the repo.
+- Make improvements.
+- Create PR.
+- Wait for code-review and PR approval.
+- Rejoice and repeat :-)
+
+
