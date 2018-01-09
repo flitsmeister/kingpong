@@ -36,7 +36,9 @@ const getLeaderBoardString = function *() {
         const wins = yield Mysql.instance.query('SELECT COUNT(*) as count FROM matches where winner_id = ?', [row.playerId]);
         const losses = yield Mysql.instance.query('SELECT COUNT(*) as count FROM matches where winner_id IS NOT NULL AND (player1_id = ? OR player2_id = ?) AND (winner_id != ?)', [row.playerId, row.playerId, row.playerId]);
 
-        leaderboard = leaderboard.concat(`* #${i} \`${row.score}\` <@${row.playerId}>* - _${wins[0].count} wins, ${losses[0].count} losses_ \n`);
+        if (wins[0].count > 0 || losses[0].count > 0) {
+            leaderboard = leaderboard.concat(`* #${i} \`${row.score}\` <@${row.playerId}>* - _${wins[0].count} wins, ${losses[0].count} losses_ \n`);
+        }
         i++;
     }
 
