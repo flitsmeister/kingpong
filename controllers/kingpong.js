@@ -7,6 +7,8 @@ const Slack = require('../providers/slack');
 
 const Elo = require('../utils/elo');
 
+var daysInactiveLeaderboard = 10
+
 const challengeFinishedText = [
     '*p1* has beaten *p2* again',
     '*p1* has destroyed *p2* without mercy!',
@@ -25,7 +27,7 @@ const challengeFinishedText = [
 
 const getLeaderBoardString = function *() {
 
-    let leaderboard = '*```LEADERBOARD```* ';
+    let leaderboard = '*```LEADERBOARD - last ' + daysInactiveLeaderboard + ' days```*';
 
     const rows = yield Mysql.instance.query('SELECT * FROM players ORDER BY score DESC');
 
@@ -35,8 +37,10 @@ const getLeaderBoardString = function *() {
 
         const wins = yield Mysql.instance.query('SELECT COUNT(*) as count FROM matches where winner_id = ?', [row.playerId]);
         const losses = yield Mysql.instance.query('SELECT COUNT(*) as count FROM matches where winner_id IS NOT NULL AND (player1_id = ? OR player2_id = ?) AND (winner_id != ?)', [row.playerId, row.playerId, row.playerId]);
+        const lastMatchDate = yield Mysql.instance.query('SELECT updated_at as lastMatchDate FROM matches where (player1_id = ? OR player2_id = ?) ORDER BY lastMatchDate DESC LIMIT 1', [row.playerId, row.playerId]);
 
-        if (wins[0].count > 0 || losses[0].count > 0) {
+        //Only show players in the leaderboard if they played a game in the last 10 days
+        if (lastMatchDate.length > 0 && getDaysDifferenceSinceToday(lastMatchDate[0].lastMatchDate) <= daysInactiveLeaderboard) {
             leaderboard = leaderboard.concat(`* #${i} \`${row.score}\` <@${row.playerId}>* - _${wins[0].count} wins, ${losses[0].count} losses_ \n`);
         }
         i++;
@@ -44,6 +48,12 @@ const getLeaderBoardString = function *() {
 
     return leaderboard;
 };
+
+const getDaysDifferenceSinceToday = function (date) {
+    var today = new Date()
+    var diff = today.getTime() - date.getTime()
+    return diff / (1000 * 60 * 60 * 24)
+}
 
 const getMatchIdForPlayers = function *(playerId1, playerId2) {
     const result = yield Mysql.instance.query('SELECT id as match_id FROM matches WHERE (player1_id = ? AND player2_id = ?) OR (player2_id = ? AND player1_id = ?) ORDER BY created_at DESC LIMIT 1', [playerId1, playerId2, playerId1, playerId2]);
