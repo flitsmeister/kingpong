@@ -17,16 +17,6 @@ const challenge = function *(request, slackMessage, h) {
 
     const challengingPlayer = yield KingPong.getPlayerFromId(slackMessage.user_id);
 
-    if (slackMessage.toLowerCase == "winner") {
-        const challengedPlayerName = yield Mysql.instance.query('SELECT * FROM players ORDER BY score DESC')[0];
-
-        yield sendSlackMessage(challengedPlayerName, slackMessage);
-
-        return h
-        .response(`You have challenged the King aka <${challengedPlayerName}>! Please wait for a response...`)
-        .header('Content-Type', 'application/json');
-    }
-
     if (challengingPlayer === null) {
         return h
             .response({
@@ -39,6 +29,16 @@ const challenge = function *(request, slackMessage, h) {
                 ]
             })
             .header('Content-Type', 'application/json');
+    }
+
+    if (slackMessage.text.split(' ').pop().toLowerCase() == "king") {
+        const challengedPlayerName = yield Mysql.instance.query('SELECT * FROM players ORDER BY score DESC')[0];
+
+        yield sendSlackMessageToChallengePlayer(challengedPlayerName, slackMessage);
+
+        return h
+        .response(`You have challenged the King aka <${challengedPlayerName}>! Please wait for a response...`)
+        .header('Content-Type', 'application/json');
     }
 
     const challengedPlayerName = slackMessage.text.split(' ').pop();
@@ -63,15 +63,15 @@ const challenge = function *(request, slackMessage, h) {
             .header('Content-Type', 'application/json');
     }
 
-    yield sendSlackMessage(challengedPlayerId, slackMessage);
+    yield sendSlackMessageToChallengePlayer(challengedPlayerId, slackMessage);
 
     return h
     .response(`You have challenged <${challengedPlayerName}>! Please wait for a response...`)
     .header('Content-Type', 'application/json');
 
-};
+}; 
 
-const sendSlackMessage = function *(challengedPlayerName, slackMessage) {
+const sendSlackMessageToChallengePlayer = function *(challengedPlayerName, slackMessage) {
   yield Slack.sendSlackMessage(challengedPlayerName, '',
         [
             {
