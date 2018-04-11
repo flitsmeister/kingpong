@@ -95,7 +95,7 @@ const sendSlackMessageToChallengePlayer = function *(challengedPlayerName, slack
                 ]
             }
         ]);
-}
+};
 
 const registerPlayer = function *(request, slackMessage, h) {
     yield KingPong.registerPlayer(request, slackMessage, h);
