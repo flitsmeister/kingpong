@@ -41,7 +41,7 @@ const getLeaderBoardString = function *() {
 
         //Only show players in the leaderboard if they played a game in the last 10 days
         if (lastMatchDate.length > 0 && getDaysDifferenceSinceToday(lastMatchDate[0].lastMatchDate) <= daysInactiveLeaderboard) {
-            leaderboard = leaderboard.concat(`* #${i} \`${row.score}\` <@${row.playerId}>* - _${wins[0].count} wins, ${losses[0].count} losses_ \n`);
+            leaderboard = leaderboard.concat(`* #${i} \`${row.score}\` <@${row.playerId}> ${(i == 1) ? ':crown:' : ''}* - _${wins[0].count} wins, ${losses[0].count} losses_ \n`);
         }
         i++;
     }
