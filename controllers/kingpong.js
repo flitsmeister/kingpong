@@ -27,10 +27,10 @@ const challengeFinishedText = [
 
 const getLeaderBoardString = function *() {
 
-    let leaderboard = '*```LEADERBOARD```*';
+    let leaderboard = '*```LEADERBOARD```* ';
 
-        // Only show players in the leaderboard if they played a game in the last 10 days
-        const rows = yield Mysql.instance.query('SELECT * FROM players WHERE updated_at > ? ORDER BY score DESC', [new Date(new Date().getTime() - (DAYS_INACTIVE * 1000 * 60 * 60 * 24))]);
+    // Only show players in the leaderboard if they played a game in the last 10 days
+    const rows = yield Mysql.instance.query('SELECT * FROM players WHERE updated_at > ? ORDER BY score DESC', [new Date(new Date().getTime() - (DAYS_INACTIVE * 1000 * 60 * 60 * 24))]);
 
     let i = 1;
 
@@ -40,12 +40,12 @@ const getLeaderBoardString = function *() {
         const losses = yield Mysql.instance.query('SELECT COUNT(*) as count FROM matches where winner_id IS NOT NULL AND (player1_id = ? OR player2_id = ?) AND (winner_id != ?)', [row.playerId, row.playerId, row.playerId]);
 
         if (wins[0].count > 0 || losses[0].count > 0) {
-            leaderboard = leaderboard.concat(`* #${i} \`${row.score}\` ${(i == 1) ? ':crown:' : ''} <@${row.playerId}>* - _${wins[0].count} wins, ${losses[0].count} losses_ \n`);
+            leaderboard = leaderboard.concat(`*#${i} \`${row.score}\` ${(i == 1) ? ':crown:' : ''} <@${row.playerId}>* - _${wins[0].count} wins, ${losses[0].count} losses_ \n`);
         }
         i++;
     }
 
-    return leaderboard.concat('_```* These players were active in the past ' + DAYS_INACTIVE + ' days.```_');
+    return leaderboard.concat('_```These players were active in the past ' + DAYS_INACTIVE + ' days.```_\r\n');
 };
 
 const getMatchIdForPlayers = function *(playerId1, playerId2) {
