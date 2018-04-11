@@ -31,13 +31,14 @@ const challenge = function *(request, slackMessage, h) {
             .header('Content-Type', 'application/json');
     }
 
-    if (slackMessage.text.split(' ').pop().toLowerCase() == "king") {
-        const challenged = yield Mysql.instance.query('SELECT playerName FROM players ORDER BY score DESC')[0];
-        yield sendSlackMessageToChallengePlayer("@"+challenged.playerName, slackMessage);
+    if (slackMessage.text.split(' ').pop().toLowerCase() === "king") {
+        const challengedPlayer = yield Mysql.instance.query('SELECT playerId,playerName FROM players ORDER BY score DESC LIMIT 1');
+
+        yield sendSlackMessageToChallengePlayer(challengedPlayer[0].playerId, slackMessage.user_id);
 
         return h
-        .response(`You have challenged the King aka <@${challenged.playerName}>! Please wait for a response...`)
-        .header('Content-Type', 'application/json');
+            .response(`You have challenged the King aka :crown: <@${challengedPlayer[0].playerName}>! Please wait for a response...`)
+            .header('Content-Type', 'application/json');
     }
 
     const challengedPlayerName = slackMessage.text.split(' ').pop();
@@ -52,8 +53,8 @@ const challenge = function *(request, slackMessage, h) {
         return h.response({
             'attachments': [
                 {
-                    fallback: `No registered players with the name <${challengedPlayerName}> were found. Try again or let them join!`,
-                    text: `No registered players with the name <${challengedPlayerName}> were found. Try again or let them join!`,
+                    fallback: `No registered players with the name <@${challengedPlayerName}> were found. Try again or let them join!`,
+                    text: `No registered players with the name <@${challengedPlayerName}> were found. Try again or let them join!`,
                     image_url: 'https://assets.flitsmeister.nl/kingpong/404-PlayerNotFound.png',
                     color: 'danger'
                 }
@@ -62,19 +63,19 @@ const challenge = function *(request, slackMessage, h) {
             .header('Content-Type', 'application/json');
     }
 
-    yield sendSlackMessageToChallengePlayer(challengedPlayerName, slackMessage);
+    yield sendSlackMessageToChallengePlayer(challengedPlayerId, slackMessage.user_id);
 
     return h
-    .response(`You have challenged <${challengedPlayerName}>! Please wait for a response...`)
-    .header('Content-Type', 'application/json');
+        .response(`You have challenged <@${challengedPlayerName}>! Please wait for a response...`)
+        .header('Content-Type', 'application/json');
 
-}; 
+};
 
-const sendSlackMessageToChallengePlayer = function *(challengedPlayerName, slackMessage) {
-  yield Slack.sendSlackMessage(challengedPlayerName, '',
+const sendSlackMessageToChallengePlayer = function *(challengedPlayerId, challengerPlayerId) {
+  yield Slack.sendSlackMessage(challengedPlayerId, '',
         [
             {
-                'text': `<@${slackMessage.user_id}> challenges you for a ping pong match. Do you accept? Or pussy out? :smirk:`,
+                'text': `<@${challengerPlayerId}> challenges you for a ping pong match. Do you accept? Or pussy out? :smirk:`,
                 'fallback': 'You have been challenged for a ping pong match!',
                 'callback_id': 'challenge_accept',
                 'actions': [
@@ -82,7 +83,7 @@ const sendSlackMessageToChallengePlayer = function *(challengedPlayerName, slack
                         'name': 'game',
                         'text': 'Game On!',
                         'type': 'button',
-                        'value': `accept;${slackMessage.user_id}`,
+                        'value': `accept;${challengerPlayerId}`,
                         'style': 'primary'
                     },
                     {
@@ -90,7 +91,7 @@ const sendSlackMessageToChallengePlayer = function *(challengedPlayerName, slack
                         'text': 'Pussy Out!',
                         'style': 'danger',
                         'type': 'button',
-                        'value': `decline;${slackMessage.user_id}`
+                        'value': `decline;${challengerPlayerId}`
                     }
                 ]
             }
