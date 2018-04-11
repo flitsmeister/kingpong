@@ -31,6 +31,16 @@ const challenge = function *(request, slackMessage, h) {
             .header('Content-Type', 'application/json');
     }
 
+    if (slackMessage.text.split(' ').pop().toLowerCase() == "king") {
+        const challengedPlayerName = yield Mysql.instance.query('SELECT * FROM players ORDER BY score DESC')[0];
+
+        yield sendSlackMessageToChallengePlayer(challengedPlayerName, slackMessage);
+
+        return h
+        .response(`You have challenged the King aka <${challengedPlayerName}>! Please wait for a response...`)
+        .header('Content-Type', 'application/json');
+    }
+
     const challengedPlayerName = slackMessage.text.split(' ').pop();
     const challengedPlayerIdResult = yield Mysql.instance.query('SELECT playerId FROM players where playerName = ? LIMIT 1', [challengedPlayerName.replace('@', '')]);
 
@@ -53,7 +63,16 @@ const challenge = function *(request, slackMessage, h) {
             .header('Content-Type', 'application/json');
     }
 
-    yield Slack.sendSlackMessage(challengedPlayerName, '',
+    yield sendSlackMessageToChallengePlayer(challengedPlayerId, slackMessage);
+
+    return h
+    .response(`You have challenged <${challengedPlayerName}>! Please wait for a response...`)
+    .header('Content-Type', 'application/json');
+
+}; 
+
+const sendSlackMessageToChallengePlayer = function *(challengedPlayerName, slackMessage) {
+  yield Slack.sendSlackMessage(challengedPlayerName, '',
         [
             {
                 'text': `<@${slackMessage.user_id}> challenges you for a ping pong match. Do you accept? Or pussy out? :smirk:`,
@@ -77,12 +96,7 @@ const challenge = function *(request, slackMessage, h) {
                 ]
             }
         ]);
-
-    return h
-        .response(`You have challenged <${challengedPlayerName}>! Please wait for a response...`)
-        .header('Content-Type', 'application/json');
-
-};
+}
 
 const registerPlayer = function *(request, slackMessage, h) {
     yield KingPong.registerPlayer(request, slackMessage, h);
