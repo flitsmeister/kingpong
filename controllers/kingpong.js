@@ -113,8 +113,8 @@ const announceWinner = function *(matchId, ratingPlayerId, winner, loser) {
                 const leaderboard = yield getLeaderBoardString();
                 const content = `The match is finished. Current standings:\n${leaderboard}`;
 
-                yield Slack.postMessage(winner.playerId, content);
-                yield Slack.postMessage(loser.playerId, content);
+                yield Slack.sendSlackMessage(winner.playerId, content);
+                yield Slack.sendSlackMessage(loser.playerId, content);
 
                 // TODO: later, fix slackbot permissions.
                 // const randomText = challengeFinishedText[Math.floor(Math.random() * challengeFinishedText.length)];
@@ -168,41 +168,26 @@ const acceptChallenge = function *(payload) {
         throw new Error('challenge player not found');
     }
 
-    yield Slack.chat.update({
-        token: process.env.SLACK_BOT_TOKEN,
-        as_user: false,
-        text: '',
-        attachments: accepted ? [
-            {
-                fallback: `You have accepted the challenge from <@${challengerPlayerId}> :smirk:`,
-                text: `You have accepted the challenge from <@${challengerPlayerId}> :smirk:`,
-                image_url: 'https://assets.flitsmeister.nl/kingpong/challenge-accepted.png',
-                color: '#90D748'
-            }
-        ] : [
-            {
-                text: `You are a coward! <@${challengerPlayerId}> is disappointed in you. :confused:`,
-            }
-        ],
-        channel: payload.channel.id,
-        ts: payload.original_message.ts
-    });
+    yield Slack.updateChat(payload.channel.id, payload.original_message.ts,
+        accepted ? [{
+            fallback: `You have accepted the challenge from <@${challengerPlayerId}> :smirk:`,
+            text: `You have accepted the challenge from <@${challengerPlayerId}> :smirk:`,
+            image_url: 'https://assets.flitsmeister.nl/kingpong/challenge-accepted.png',
+            color: '#90D748'
+        }] : [{
+            text: `You are a coward! <@${challengerPlayerId}> is disappointed in you. :confused:`,
+        }]);
 
     if (!accepted) {
         // TODO: error no player Id :O
-        yield Slack.chat.update({
-            token: process.env.SLACK_BOT_TOKEN,
-            as_user: false,
-            text: '',
-            attachments: [
-                {
-                    'text': 'Something went wrong, please try again later :disappointed:'
-                    // TODO: better texts etc.
-                }
-            ],
-            channel: payload.channel.id,
-            ts: payload.original_message.ts
-        });
+
+        yield Slack.updateChat(payload.channel.id, payload.original_message.ts, [
+            {
+                'text': 'Something went wrong, please try again later :disappointed:'
+                // TODO: better texts etc.
+            }
+        ]);
+
         return;
     }
 
@@ -268,19 +253,12 @@ const finishChallenge = function *(payload) {
 
     const ratingPlayerId = payload.user.id;
 
-    yield Slack.chat.update({
-        token: process.env.SLACK_BOT_TOKEN,
-        as_user: false,
-        text: '',
-        attachments: [
-            {
-                'text': 'Thanks! I hope you didn\'t cheat :wink:'
-                // TODO: better texts
-            }
-        ],
-        channel: payload.channel.id,
-        ts: payload.original_message.ts
-    });
+    yield Slack.updateChat(payload.channel.id, payload.original_message.ts, [
+        {
+            'text': 'Thanks! I hope you didn\'t cheat :wink:'
+            // TODO: better texts
+        }
+    ]);
 
     if (payload.actions.length > 0) {
         const values = payload.actions[0].value.split(';');

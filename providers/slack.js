@@ -11,3 +11,16 @@ exports.sendSlackMessage = function *(channel, message, attachments) {
         attachments
     });
 };
+
+exports.updateChat = function *(channel, ts, attachments) {
+
+    yield Slack.chat.update({
+        token: process.env.SLACK_BOT_TOKEN,
+        as_user: false,
+        text: '',
+        attachments,
+        channel,
+        ts
+    });
+
+}
