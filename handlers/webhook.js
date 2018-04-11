@@ -34,7 +34,7 @@ const challenge = function *(request, slackMessage, h) {
     if (slackMessage.text.split(' ').pop().toLowerCase() === "king") {
         const challengedPlayer = yield Mysql.instance.query('SELECT playerId,playerName FROM players ORDER BY score DESC LIMIT 1');
 
-        yield sendSlackMessageToChallengePlayer(challengedPlayer[0].playerId, slackMessage);
+        yield sendSlackMessageToChallengePlayer(challengedPlayer[0].playerId, slackMessage.user_id);
 
         return h
             .response(`You have challenged the King aka :crown: <@${challengedPlayer[0].playerName}>! Please wait for a response...`)
@@ -63,7 +63,7 @@ const challenge = function *(request, slackMessage, h) {
             .header('Content-Type', 'application/json');
     }
 
-    yield sendSlackMessageToChallengePlayer(challengedPlayerId, slackMessage);
+    yield sendSlackMessageToChallengePlayer(challengedPlayerId, slackMessage.user_id);
 
     return h
         .response(`You have challenged <@${challengedPlayerName}>! Please wait for a response...`)
@@ -71,11 +71,11 @@ const challenge = function *(request, slackMessage, h) {
 
 };
 
-const sendSlackMessageToChallengePlayer = function *(challengedPlayerName, slackMessage) {
-  yield Slack.sendSlackMessage(challengedPlayerName, '',
+const sendSlackMessageToChallengePlayer = function *(challengedPlayerId, challengerPlayerId) {
+  yield Slack.sendSlackMessage(challengedPlayerId, '',
         [
             {
-                'text': `<@${slackMessage.user_id}> challenges you for a ping pong match. Do you accept? Or pussy out? :smirk:`,
+                'text': `<@${challengerPlayerId}> challenges you for a ping pong match. Do you accept? Or pussy out? :smirk:`,
                 'fallback': 'You have been challenged for a ping pong match!',
                 'callback_id': 'challenge_accept',
                 'actions': [
@@ -83,7 +83,7 @@ const sendSlackMessageToChallengePlayer = function *(challengedPlayerName, slack
                         'name': 'game',
                         'text': 'Game On!',
                         'type': 'button',
-                        'value': `accept;${slackMessage.user_id}`,
+                        'value': `accept;${challengerPlayerId}`,
                         'style': 'primary'
                     },
                     {
@@ -91,7 +91,7 @@ const sendSlackMessageToChallengePlayer = function *(challengedPlayerName, slack
                         'text': 'Pussy Out!',
                         'style': 'danger',
                         'type': 'button',
-                        'value': `decline;${slackMessage.user_id}`
+                        'value': `decline;${challengerPlayerId}`
                     }
                 ]
             }
