@@ -32,12 +32,11 @@ const challenge = function *(request, slackMessage, h) {
     }
 
     if (slackMessage.text.split(' ').pop().toLowerCase() == "king") {
-        const challengedPlayerName = yield Mysql.instance.query('SELECT * FROM players ORDER BY score DESC')[0];
-
-        yield sendSlackMessageToChallengePlayer(challengedPlayerName, slackMessage);
+        const challenged = yield Mysql.instance.query('SELECT playerName FROM players ORDER BY score DESC')[0];
+        yield sendSlackMessageToChallengePlayer("@"+challenged.playerName, slackMessage);
 
         return h
-        .response(`You have challenged the King aka <${challengedPlayerName}>! Please wait for a response...`)
+        .response(`You have challenged the King aka <@${challenged.playerName}>! Please wait for a response...`)
         .header('Content-Type', 'application/json');
     }
 
@@ -63,7 +62,7 @@ const challenge = function *(request, slackMessage, h) {
             .header('Content-Type', 'application/json');
     }
 
-    yield sendSlackMessageToChallengePlayer(challengedPlayerId, slackMessage);
+    yield sendSlackMessageToChallengePlayer(challengedPlayerName, slackMessage);
 
     return h
     .response(`You have challenged <${challengedPlayerName}>! Please wait for a response...`)
