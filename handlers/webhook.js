@@ -17,7 +17,7 @@ const challenge = function *(request, slackMessage, h) {
 
     const challengingPlayer = yield KingPong.getPlayerFromId(slackMessage.user_id);
 
-    if (challengedPlayerId.toLowerCase == "winner") {
+    if (slackMessage.toLowerCase == "winner") {
         const challengedPlayerName = yield Mysql.instance.query('SELECT * FROM players ORDER BY score DESC')[0];
 
         yield sendSlackMessage(challengedPlayerName, slackMessage);
