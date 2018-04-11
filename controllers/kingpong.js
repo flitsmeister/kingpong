@@ -7,7 +7,7 @@ const Slack = require('../providers/slack');
 
 const Elo = require('../utils/elo');
 
-var daysInactiveLeaderboard = 10
+const DAYS_INACTIVE = 10;
 
 const challengeFinishedText = [
     '*p1* has beaten *p2* again',
@@ -27,9 +27,10 @@ const challengeFinishedText = [
 
 const getLeaderBoardString = function *() {
 
-    let leaderboard = '*```LEADERBOARD - last ' + daysInactiveLeaderboard + ' days```*';
+    let leaderboard = '```LEADERBOARD - last ' + DAYS_INACTIVE + ' days```';
 
-    const rows = yield Mysql.instance.query('SELECT * FROM players ORDER BY score DESC');
+    // Only show players in the leaderboard if they played a game in the last 10 days
+    const rows = yield Mysql.instance.query('SELECT * FROM players WHERE updated_at > ? ORDER BY score DESC', [new Date(new Date().getTime() - (DAYS_INACTIVE * 1000 * 60 * 60 * 24))]);
 
     let i = 1;
 
@@ -37,23 +38,13 @@ const getLeaderBoardString = function *() {
 
         const wins = yield Mysql.instance.query('SELECT COUNT(*) as count FROM matches where winner_id = ?', [row.playerId]);
         const losses = yield Mysql.instance.query('SELECT COUNT(*) as count FROM matches where winner_id IS NOT NULL AND (player1_id = ? OR player2_id = ?) AND (winner_id != ?)', [row.playerId, row.playerId, row.playerId]);
-        const lastMatchDate = yield Mysql.instance.query('SELECT updated_at as lastMatchDate FROM matches where (player1_id = ? OR player2_id = ?) ORDER BY lastMatchDate DESC LIMIT 1', [row.playerId, row.playerId]);
 
-        //Only show players in the leaderboard if they played a game in the last 10 days
-        if (lastMatchDate.length > 0 && getDaysDifferenceSinceToday(lastMatchDate[0].lastMatchDate) <= daysInactiveLeaderboard) {
-            leaderboard = leaderboard.concat(`* #${i} \`${row.score}\` <@${row.playerId}> ${(i == 1) ? ':crown:' : ''}* - _${wins[0].count} wins, ${losses[0].count} losses_ \n`);
-        }
+        leaderboard = leaderboard.concat(`* #${i} \`${row.score}\` ${(i == 1) ? ':crown:' : ''} <@${row.playerId}> - _${wins[0].count} wins, ${losses[0].count} losses_ \n`);
         i++;
     }
 
     return leaderboard;
 };
-
-const getDaysDifferenceSinceToday = function (date) {
-    var today = new Date()
-    var diff = today.getTime() - date.getTime()
-    return diff / (1000 * 60 * 60 * 24)
-}
 
 const getMatchIdForPlayers = function *(playerId1, playerId2) {
     const result = yield Mysql.instance.query('SELECT id as match_id FROM matches WHERE (player1_id = ? AND player2_id = ?) OR (player2_id = ? AND player1_id = ?) ORDER BY created_at DESC LIMIT 1', [playerId1, playerId2, playerId1, playerId2]);

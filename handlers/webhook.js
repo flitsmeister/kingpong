@@ -31,14 +31,14 @@ const challenge = function *(request, slackMessage, h) {
             .header('Content-Type', 'application/json');
     }
 
-    if (slackMessage.text.split(' ').pop().toLowerCase() == "king") {
-        const challengedPlayerName = yield Mysql.instance.query('SELECT * FROM players ORDER BY score DESC')[0];
+    if (slackMessage.text.split(' ').pop().toLowerCase() === "king") {
+        const challengedPlayer = yield Mysql.instance.query('SELECT playerId,playerName FROM players ORDER BY score DESC LIMIT 1');
 
-        yield sendSlackMessageToChallengePlayer(challengedPlayerName, slackMessage);
+        yield sendSlackMessageToChallengePlayer(challengedPlayer[0].playerId, slackMessage);
 
         return h
-        .response(`You have challenged the King aka <${challengedPlayerName}>! Please wait for a response...`)
-        .header('Content-Type', 'application/json');
+            .response(`You have challenged the King aka :crown: <@${challengedPlayer[0].playerName}>! Please wait for a response...`)
+            .header('Content-Type', 'application/json');
     }
 
     const challengedPlayerName = slackMessage.text.split(' ').pop();
@@ -53,8 +53,8 @@ const challenge = function *(request, slackMessage, h) {
         return h.response({
             'attachments': [
                 {
-                    fallback: `No registered players with the name <${challengedPlayerName}> were found. Try again or let them join!`,
-                    text: `No registered players with the name <${challengedPlayerName}> were found. Try again or let them join!`,
+                    fallback: `No registered players with the name <@${challengedPlayerName}> were found. Try again or let them join!`,
+                    text: `No registered players with the name <@${challengedPlayerName}> were found. Try again or let them join!`,
                     image_url: 'https://assets.flitsmeister.nl/kingpong/404-PlayerNotFound.png',
                     color: 'danger'
                 }
@@ -66,10 +66,10 @@ const challenge = function *(request, slackMessage, h) {
     yield sendSlackMessageToChallengePlayer(challengedPlayerId, slackMessage);
 
     return h
-    .response(`You have challenged <${challengedPlayerName}>! Please wait for a response...`)
-    .header('Content-Type', 'application/json');
+        .response(`You have challenged <@${challengedPlayerName}>! Please wait for a response...`)
+        .header('Content-Type', 'application/json');
 
-}; 
+};
 
 const sendSlackMessageToChallengePlayer = function *(challengedPlayerName, slackMessage) {
   yield Slack.sendSlackMessage(challengedPlayerName, '',
