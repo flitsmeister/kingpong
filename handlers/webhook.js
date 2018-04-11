@@ -66,7 +66,7 @@ const challenge = function *(request, slackMessage, h) {
     yield sendSlackMessageToChallengePlayer(challengedPlayerId, slackMessage.user_id);
 
     return h
-        .response(`You have challenged <@${challengedPlayerName}>! Please wait for a response...`)
+        .response(`You have challenged <@${challengedPlayerId}>! Please wait for a response...`)
         .header('Content-Type', 'application/json');
 
 };
