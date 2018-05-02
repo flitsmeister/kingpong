@@ -53,8 +53,8 @@ const challenge = function *(request, slackMessage, h) {
         return h.response({
             'attachments': [
                 {
-                    fallback: `No registered players with the name <@${challengedPlayerName}> were found. Try again or let them join!`,
-                    text: `No registered players with the name <@${challengedPlayerName}> were found. Try again or let them join!`,
+                    fallback: `No registered players with the name <${challengedPlayerName}> were found. Try again or let them join!`,
+                    text: `No registered players with the name <${challengedPlayerName}> were found. Try again or let them join!`,
                     image_url: 'https://assets.flitsmeister.nl/kingpong/404-PlayerNotFound.png',
                     color: 'danger'
                 }
@@ -66,7 +66,7 @@ const challenge = function *(request, slackMessage, h) {
     yield sendSlackMessageToChallengePlayer(challengedPlayerId, slackMessage.user_id);
 
     return h
-        .response(`You have challenged <@${challengedPlayerName}>! Please wait for a response...`)
+        .response(`You have challenged <${challengedPlayerName}>! Please wait for a response...`)
         .header('Content-Type', 'application/json');
 
 };
@@ -130,6 +130,8 @@ const parseSlackCommand = function *(request, h) {
 const parseSlackHook = function *(request, h) {
 
     const payload = JSON.parse(request.payload.payload);
+
+    console.log(payload);
 
     switch (payload.callback_id) {
         case 'challenge_accept' : return yield KingPong.acceptChallenge(payload);

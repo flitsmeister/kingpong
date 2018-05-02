@@ -178,18 +178,7 @@ const acceptChallenge = function *(payload) {
             text: `You are a coward! <@${challengerPlayerId}> is disappointed in you. :confused:`,
         }]);
 
-    if (!accepted) {
-        // TODO: error no player Id :O
-
-        yield Slack.updateChat(payload.channel.id, payload.original_message.ts, [
-            {
-                'text': 'Something went wrong, please try again later :disappointed:'
-                // TODO: better texts etc.
-            }
-        ]);
-
-        return;
-    }
+    if (!accepted) return 'OK';
 
     const matchInsert = yield Mysql.instance.query('INSERT INTO matches(player1_id, player2_id) VALUES(?, ?)', [challengerPlayerId, opponentPlayerId]);
     const matchId = matchInsert.insertId;
@@ -247,6 +236,8 @@ const acceptChallenge = function *(payload) {
             color: 'danger'
         }
     ]);
+
+    return 'OK';
 };
 
 const finishChallenge = function *(payload) {
