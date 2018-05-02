@@ -178,7 +178,7 @@ const acceptChallenge = function *(payload) {
             text: `You are a coward! <@${challengerPlayerId}> is disappointed in you. :confused:`,
         }]);
 
-    if (!accepted) return 'OK';
+    if (!accepted) return '';
 
     const matchInsert = yield Mysql.instance.query('INSERT INTO matches(player1_id, player2_id) VALUES(?, ?)', [challengerPlayerId, opponentPlayerId]);
     const matchId = matchInsert.insertId;
@@ -237,7 +237,7 @@ const acceptChallenge = function *(payload) {
         }
     ]);
 
-    return 'OK';
+    return '';
 };
 
 const finishChallenge = function *(payload) {
@@ -262,6 +262,7 @@ const finishChallenge = function *(payload) {
         }
     }
 
+    return '';
 };
 
 module.exports = {

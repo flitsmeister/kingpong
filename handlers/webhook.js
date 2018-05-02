@@ -131,8 +131,6 @@ const parseSlackHook = function *(request, h) {
 
     const payload = JSON.parse(request.payload.payload);
 
-    console.log(payload);
-
     switch (payload.callback_id) {
         case 'challenge_accept' : return yield KingPong.acceptChallenge(payload);
         case 'challenge_result' : return yield KingPong.finishChallenge(payload);
