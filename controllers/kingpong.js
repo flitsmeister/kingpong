@@ -219,7 +219,7 @@ const acceptChallenge = function *(payload) {
             yield Slack.sendSlackMessage(opponentPlayerId, '', attachments);
         });
 
-    }, 1000 * 60 * 10);
+    }, 1000 * 60);
 
     yield Slack.sendSlackMessage(challengerPlayerId, '', accepted ? [
         {
